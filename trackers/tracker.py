@@ -17,6 +17,7 @@ class Tracker:
         return detections
     
     def get_object_tracks(self, frames, read_from_stub=False, stub_path=None):
+
         
         if read_from_stub and stub_path is not None and os.path.exists(stub_path):
             with open(stub_path,'rb') as f:
@@ -75,5 +76,35 @@ class Tracker:
         return tracks
 
 
+    def draw_annotations(self,video_frames, tracks,team_ball_control):
+        output_video_frames= []
+        for frame_num, frame in enumerate(video_frames):
+            frame = frame.copy()
 
-    
+            player_dict = tracks["players"][frame_num]
+            ball_dict = tracks["ball"][frame_num]
+            referee_dict = tracks["referees"][frame_num]
+
+            # Draw Players
+            for track_id, player in player_dict.items():
+                color = player.get("team_color",(0,0,255))
+                frame = self.draw_ellipse(frame, player["bbox"],color, track_id)
+
+                if player.get('has_ball',False):
+                    frame = self.draw_traingle(frame, player["bbox"],(0,0,255))
+
+            # Draw Referee
+            for _, referee in referee_dict.items():
+                frame = self.draw_ellipse(frame, referee["bbox"],(0,255,255))
+            
+            # Draw ball 
+            for track_id, ball in ball_dict.items():
+                frame = self.draw_traingle(frame, ball["bbox"],(0,255,0))
+
+
+            # Draw Team Ball Control
+            frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)
+
+            output_video_frames.append(frame)
+
+        return output_video_frames
