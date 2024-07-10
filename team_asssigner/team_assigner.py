@@ -1,8 +1,18 @@
+from sklearn.cluster import KMeans
+
 class TeamAssigner:
     def __init__(self):
         pass
 
-    
+    def get_clustering_model(self,image):
+        # Reshape the image to 2D array
+        image_2d = image.reshape(-1,3)
+
+        # Preform K-means with 2 clusters
+        kmeans = KMeans(n_clusters=2, init="k-means++",n_init=1)
+        kmeans.fit(image_2d)
+
+        return kmeans
 
     def get_player_color(self, frame, bbox):
         image = frame[int(bbox[1]):int(bbox[3]),int(bbox[0]):int(bbox[2])]
